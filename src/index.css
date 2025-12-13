@@ -1,0 +1,42 @@
+@import url("https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-secondary: #ffe1a7;
+
+  --color-primary: #ffa800;
+  --color-primary-50: #fffaef;
+  --color-primary-500: #ffe1a7;
+  --font-satoshi: "Satoshi-Regular", ui-sans-serif, system-ui, sans-serif;
+  --font-satoshi-light: "Satoshi-Light", ui-sans-serif, system-ui, sans-serif;
+  --font-satoshi-medium: "Satoshi-Medium", ui-sans-serif, system-ui, sans-serif;
+  --font-satoshi-medium-italic: "Satoshi-MediumItalic", ui-sans-serif, system-ui,
+    sans-serif;
+  --font-satoshi-bold: "Satoshi-Bold", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Satoshi-Regular", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Satoshi-Regular", "Inter", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 168, 0, 0.08), transparent 22%),
+    radial-gradient(circle at 80% 0%, rgba(255, 225, 167, 0.08), transparent 30%),
+    #0b1220;
+  color: #e5e7eb;
+}
+
+.glass {
+  background: rgba(30, 41, 59, 0.72);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
