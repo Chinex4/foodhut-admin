@@ -39,7 +39,11 @@ const AuthPage = () => {
       sx={{
         display: "grid",
         placeItems: "center",
-        background: "linear-gradient(135deg, #fffaef, #ffe1a7)",
+        background: `
+          linear-gradient(135deg, rgba(15,23,42,0.95), rgba(11,17,31,0.98)),
+          radial-gradient(circle at 20% 20%, rgba(255,168,0,0.14), transparent 30%),
+          radial-gradient(circle at 80% 10%, rgba(255,225,167,0.12), transparent 32%)
+        `,
         p: 2,
       }}
     >
