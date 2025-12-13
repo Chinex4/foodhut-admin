@@ -25,13 +25,14 @@ const initialState: KitchensState = {
 
 type KitchensResponse = { items: Kitchen[]; meta?: { page: number; per_page: number; total: number } };
 
-export const fetchKitchens = createAsyncThunk<KitchensResponse, number | void>("kitchens/fetchAll", async (page = 1) => {
-  const { data } = await api.get<KitchensResponse>("/kitchens", { params: { page, per_page: 20 } });
+export const fetchKitchens = createAsyncThunk<KitchensResponse, number | undefined>("kitchens/fetchAll", async (page = 1) => {
+  const currentPage = page ?? 1;
+  const { data } = await api.get<KitchensResponse>("/kitchens", { params: { page: currentPage, per_page: 20 } });
   if (Array.isArray((data as KitchensResponse).items)) {
-    return { items: data.items, meta: data.meta };
+    return { items: data.items, meta: data.meta ?? { page: currentPage, per_page: 20, total: data.items.length } };
   }
   const fallbackItems = Array.isArray(data) ? (data as unknown as Kitchen[]) : [];
-  return { items: fallbackItems, meta: { page, per_page: 20, total: fallbackItems.length } };
+  return { items: fallbackItems, meta: { page: currentPage, per_page: 20, total: fallbackItems.length } };
 });
 
 export const fetchKitchenTypes = createAsyncThunk<string[]>("kitchens/fetchTypes", async () => {

@@ -21,11 +21,12 @@ const initialState: MealsState = {
 
 type MealsResponse = { items: Meal[]; meta?: { page: number; per_page: number; total: number } };
 
-export const fetchMeals = createAsyncThunk<MealsResponse, number | void>("meals/fetchAll", async (page = 1) => {
-  const { data } = await api.get<MealsResponse>("/meals", { params: { page, per_page: 20 } });
-  if (Array.isArray((data as MealsResponse).items)) return { items: data.items, meta: data.meta };
+export const fetchMeals = createAsyncThunk<MealsResponse, number | undefined>("meals/fetchAll", async (page = 1) => {
+  const currentPage = page ?? 1;
+  const { data } = await api.get<MealsResponse>("/meals", { params: { page: currentPage, per_page: 20 } });
+  if (Array.isArray((data as MealsResponse).items)) return { items: data.items, meta: data.meta ?? { page: currentPage, per_page: 20, total: data.items.length } };
   const fallback = Array.isArray(data) ? (data as unknown as Meal[]) : [];
-  return { items: fallback, meta: { page, per_page: 20, total: fallback.length } };
+  return { items: fallback, meta: { page: currentPage, per_page: 20, total: fallback.length } };
 });
 
 export const fetchMealById = createAsyncThunk<Meal, string>("meals/fetchById", async (id) => {

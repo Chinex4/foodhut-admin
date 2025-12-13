@@ -9,6 +9,7 @@ export type Meal = {
   image_url?: string;
   is_available?: boolean;
   rating?: string | number;
+  likes?: number;
   created_at?: string;
   updated_at?: string | null;
 };
