@@ -8,10 +8,7 @@ import App from "./App";
 import "./index.css";
 import { store } from "./store";
 import { queryClient } from "./queryClient";
-import { setupAxiosInterceptors } from "./api/axios";
 import { theme } from "./theme";
-
-setupAxiosInterceptors(store);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

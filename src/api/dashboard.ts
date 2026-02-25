@@ -1,12 +1,10 @@
-import { api } from "./axios";
 import type { DashboardAnalyticsPoint, DashboardInfo } from "@/types/dashboard";
+import { mockDashboard } from "@/data/mockDb";
 
 export const getDashboardInfo = async (): Promise<DashboardInfo> => {
-  const { data } = await api.get<DashboardInfo>("/dashboard/info");
-  return data;
+  return mockDashboard.getInfo();
 };
 
 export const getDashboardAnalytics = async (): Promise<DashboardAnalyticsPoint[]> => {
-  const { data } = await api.get<DashboardAnalyticsPoint[]>("/dashboard/analytics");
-  return data;
+  return mockDashboard.getAnalytics();
 };

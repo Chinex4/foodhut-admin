@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { api } from "@/api/axios";
+import { mockAuth } from "@/data/mockDb";
 import { tokenStorage } from "@/lib/tokenStorage";
 import type { AuthTokens, OtpPayload, UserProfile } from "@/types/auth";
 import type { RootState } from "..";
@@ -19,20 +19,17 @@ const initialState: AuthState = {
 };
 
 export const sendOtp = createAsyncThunk<void, string>("auth/sendOtp", async (phone_number) => {
-  await api.post("/auth/sign-in/strategy/phone", { phone_number });
+  await mockAuth.sendOtp(phone_number);
 });
 
 export const resendOtp = createAsyncThunk<void, string>("auth/resendOtp", async (phone_number) => {
-  await api.post("/auth/verification/send-otp", { phone_number });
+  await mockAuth.resendOtp(phone_number);
 });
 
 export const verifyOtp = createAsyncThunk<AuthTokens, OtpPayload>(
   "auth/verifyOtp",
-  async ({ phone_number, otp }) => {
-    const { data } = await api.post<AuthTokens>("/auth/verification/verify-otp", {
-      phone_number,
-      otp,
-    });
+  async (payload) => {
+    const data = await mockAuth.verifyOtp(payload);
     tokenStorage.set(data);
     return data;
   },
@@ -41,15 +38,14 @@ export const verifyOtp = createAsyncThunk<AuthTokens, OtpPayload>(
 export const refreshTokens = createAsyncThunk<AuthTokens, string>(
   "auth/refreshTokens",
   async (token) => {
-    const { data } = await api.post<AuthTokens>("/auth/refresh", { token });
+    const data = await mockAuth.refreshTokens(token);
     tokenStorage.set(data);
     return data;
   },
 );
 
 export const fetchProfile = createAsyncThunk<UserProfile>("auth/fetchProfile", async () => {
-  const { data } = await api.get<UserProfile>("/users/profile");
-  return data;
+  return mockAuth.fetchProfile();
 });
 
 const authSlice = createSlice({

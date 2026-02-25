@@ -25,7 +25,8 @@ import { createMeal, deleteMeal, fetchMealById, fetchMeals, updateMeal } from "@
 
 const MealsPage = () => {
   const dispatch = useAppDispatch();
-  const selected = useAppSelector((s) => s.meals.selected);
+  const mealsState = useAppSelector((s) => s.meals);
+  const selected = mealsState.selected;
   const [page, setPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -33,13 +34,13 @@ const MealsPage = () => {
   const [newMeal, setNewMeal] = useState({ name: "", price: "", kitchen_id: "", description: "" });
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data, refetch } = useQuery({
+  const { refetch } = useQuery({
     queryKey: ["meals", page],
     queryFn: () => dispatch(fetchMeals(page)).unwrap(),
   });
-  const meals = Array.isArray(data?.items) ? data.items : [];
+  const meals = mealsState.items;
   const filteredMeals = meals.filter((meal) => meal.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  const meta = data?.meta ?? { page: 1, per_page: 20, total: meals.length };
+  const meta = mealsState.meta ?? { page: 1, per_page: 20, total: meals.length };
   const totalPages = meta.per_page ? Math.ceil((meta.total ?? meals.length) / meta.per_page) : 1;
 
   const handleCreate = async () => {

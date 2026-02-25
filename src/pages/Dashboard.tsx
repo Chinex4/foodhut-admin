@@ -12,17 +12,17 @@ const DashboardPage = () => {
     placeholderData: { kitchens: 0, meals: 0, orders: 0, transactions: 0 },
   });
 
-  // const analyticsQuery = useQuery({
-  //   queryKey: ["dashboard-analytics"],
-  //   queryFn: getDashboardAnalytics,
-  //   placeholderData: [
-  //     { name: "Mon", value: 10 },
-  //     { name: "Tue", value: 12 },
-  //     { name: "Wed", value: 18 },
-  //     { name: "Thu", value: 16 },
-  //     { name: "Fri", value: 20 },
-  //   ],
-  // });
+  const analyticsQuery = useQuery({
+    queryKey: ["dashboard-analytics"],
+    queryFn: getDashboardAnalytics,
+    placeholderData: [
+      { name: "Mon", value: 10 },
+      { name: "Tue", value: 12 },
+      { name: "Wed", value: 18 },
+      { name: "Thu", value: 16 },
+      { name: "Fri", value: 20 },
+    ],
+  });
 
   const info = infoQuery.data ?? {
     kitchens: 0,
@@ -62,7 +62,7 @@ const DashboardPage = () => {
           />
         </Grid>
       </Grid>
-      {/* <AnalyticsChart title="Weekly Performance" data={analyticsQuery.data ?? []} /> */}
+      <AnalyticsChart title="Weekly Performance" data={analyticsQuery.data ?? []} />
     </Stack>
   );
 };

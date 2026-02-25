@@ -28,18 +28,26 @@ import {
   verifyKitchen,
 } from "@/store/slices/kitchensSlice";
 import { useState } from "react";
+import { fetchMeals } from "@/store/slices/mealsSlice";
 
 const KitchensPage = () => {
   const dispatch = useAppDispatch();
   const [page, setPage] = useState(1);
-   const [detailsOpen, setDetailsOpen] = useState(false);
-  const { data } = useQuery({
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  useQuery({
     queryKey: ["kitchens", page],
     queryFn: () => dispatch(fetchKitchensThunk(page)).unwrap(),
   });
-  const selected = useAppSelector((s) => s.kitchens.selected);
-  const kitchens = Array.isArray(data?.items) ? data.items : [];
-  const meta = data?.meta ?? { page: 1, per_page: 20, total: kitchens.length };
+  const mealsQuery = useQuery({
+    queryKey: ["vendor-menu"],
+    queryFn: () => dispatch(fetchMeals(1)).unwrap(),
+  });
+  const kitchenState = useAppSelector((s) => s.kitchens);
+  const selected = kitchenState.selected;
+  const kitchens = kitchenState.items;
+  const allMeals = Array.isArray(mealsQuery.data?.items) ? mealsQuery.data.items : [];
+  const vendorMeals = selected ? allMeals.filter((meal) => meal.kitchen_id === selected.id) : [];
+  const meta = kitchenState.meta ?? { page: 1, per_page: 20, total: kitchens.length };
   const totalPages = meta.per_page ? Math.ceil((meta.total ?? kitchens.length) / meta.per_page) : 1;
 
   const handleBlockToggle = (id: string, blocked: boolean) => {
@@ -53,7 +61,7 @@ const KitchensPage = () => {
   return (
     <Stack spacing={2}>
       <Typography variant="h5" fontWeight={700}>
-        Kitchens
+        Vendors
       </Typography>
       <Card elevation={0} sx={{ background: "rgba(17,24,39,0.9)", border: "1px solid rgba(255,255,255,0.05)" }}>
         <CardContent>
@@ -62,7 +70,7 @@ const KitchensPage = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>Cover</TableCell>
-                  <TableCell>Name</TableCell>
+                  <TableCell>Vendor</TableCell>
                   <TableCell>City</TableCell>
                   <TableCell>Type</TableCell>
                   <TableCell>Phone</TableCell>
@@ -204,6 +212,29 @@ const KitchensPage = () => {
               <Typography variant="body2"><strong>Rating:</strong> {selected?.rating ?? "—"}</Typography>
             </Stack>
             <Typography variant="body2"><strong>Description:</strong> {selected?.description ?? "—"}</Typography>
+            <Divider />
+            <Typography variant="subtitle2">Vendor menu</Typography>
+            {vendorMeals.length ? (
+              <Stack spacing={1}>
+                {vendorMeals.map((meal) => (
+                  <Stack key={meal.id} direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography variant="body2">{meal.name}</Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography variant="body2">₦{Number(meal.price ?? 0).toLocaleString()}</Typography>
+                      <Chip
+                        size="small"
+                        label={meal.is_available ? "Available" : "Unavailable"}
+                        color={meal.is_available ? "success" : "default"}
+                      />
+                    </Stack>
+                  </Stack>
+                ))}
+              </Stack>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No meals found for this vendor.
+              </Typography>
+            )}
           </Stack>
         </DialogContent>
       </Dialog>

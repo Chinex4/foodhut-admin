@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { api } from "@/api/axios";
+import { mockAdsDb } from "@/data/mockDb";
 import type { Ad, AdPayload } from "@/types/ad";
 import type { RootState } from "..";
 
@@ -20,32 +20,26 @@ const initialState: AdsState = {
 type AdsResponse = { items: Ad[]; meta?: unknown };
 
 export const fetchAds = createAsyncThunk<Ad[]>("ads/fetchAll", async () => {
-  const { data } = await api.get<AdsResponse>("/ads");
-  if (Array.isArray((data as AdsResponse).items)) return data.items;
-  return Array.isArray(data) ? (data as unknown as Ad[]) : [];
+  return mockAdsDb.fetchAll();
 });
 
 export const fetchAdById = createAsyncThunk<Ad, string>("ads/fetchById", async (id) => {
-  const { data } = await api.get<Ad>(`/ads/${id}`);
-  return data;
+  return mockAdsDb.fetchById(id);
 });
 
 export const createAd = createAsyncThunk<Ad, AdPayload>("ads/create", async (payload) => {
-  const { data } = await api.post<Ad>("/ads", payload);
-  return data;
+  return mockAdsDb.create(payload);
 });
 
 export const updateAd = createAsyncThunk<Ad, { id: string; payload: Partial<AdPayload> }>(
   "ads/update",
   async ({ id, payload }) => {
-    const { data } = await api.put<Ad>(`/ads/${id}`, payload);
-    return data;
+    return mockAdsDb.update(id, payload);
   },
 );
 
 export const deleteAd = createAsyncThunk<string, string>("ads/delete", async (id) => {
-  await api.delete(`/ads/${id}`);
-  return id;
+  return mockAdsDb.deleteById(id);
 });
 
 const adsSlice = createSlice({

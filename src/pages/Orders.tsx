@@ -24,17 +24,18 @@ import { fetchOrders } from "@/store/slices/ordersSlice";
 
 const OrdersPage = () => {
   const dispatch = useAppDispatch();
-  const selected = useAppSelector((s) => s.orders.selected);
+  const ordersState = useAppSelector((s) => s.orders);
+  const selected = ordersState.selected;
   const [page, setPage] = useState(1);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const { data } = useQuery({
+  useQuery({
     queryKey: ["orders", page],
     queryFn: () => dispatch(fetchOrders(page)).unwrap(),
   });
 
-  const orders = Array.isArray(data?.items) ? data.items : [];
-  const meta = data?.meta ?? { page: 1, per_page: 20, total: orders.length };
+  const orders = ordersState.items;
+  const meta = ordersState.meta ?? { page: 1, per_page: 20, total: orders.length };
   const totalPages = meta.per_page ? Math.ceil((meta.total ?? orders.length) / meta.per_page) : 1;
 
   return (
@@ -50,11 +51,12 @@ const OrdersPage = () => {
                 <TableRow>
                   <TableCell>ID</TableCell>
                   <TableCell>Kitchen</TableCell>
+                  <TableCell>Rider</TableCell>
                   <TableCell>Payment</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Total</TableCell>
                   <TableCell>Items</TableCell>
-                  <TableCell>Address</TableCell>
+                  <TableCell>Locations</TableCell>
                   <TableCell>Created</TableCell>
                 </TableRow>
               </TableHead>
@@ -71,6 +73,18 @@ const OrdersPage = () => {
                   >
                     <TableCell>{order.id}</TableCell>
                     <TableCell>{order.kitchen?.name ?? order.kitchen_id}</TableCell>
+                    <TableCell>
+                      {order.rider ? (
+                        <Stack spacing={0.3}>
+                          <Typography variant="body2">{order.rider.full_name}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {order.rider.phone_number}
+                          </Typography>
+                        </Stack>
+                      ) : (
+                        "Unassigned"
+                      )}
+                    </TableCell>
                     <TableCell>{order.payment_method ?? "—"}</TableCell>
                     <TableCell>
                       <Chip label={order.status} size="small" />
@@ -85,7 +99,16 @@ const OrdersPage = () => {
                         ))}
                       </Stack>
                     </TableCell>
-                    <TableCell>{order.delivery_address ?? "—"}</TableCell>
+                    <TableCell>
+                      <Stack spacing={0.3}>
+                        <Typography variant="caption" color="text.secondary">
+                          Pickup: {order.pickup_location ?? "—"}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Dropoff: {order.dropoff_location ?? order.delivery_address ?? "—"}
+                        </Typography>
+                      </Stack>
+                    </TableCell>
                     <TableCell>{order.created_at ? dayjs(order.created_at).format("YYYY-MM-DD HH:mm") : "—"}</TableCell>
                   </TableRow>
                 ))}
@@ -120,7 +143,30 @@ const OrdersPage = () => {
                   <strong>Kitchen:</strong> {selected.kitchen?.name ?? selected.kitchen_id}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Address:</strong> {selected.delivery_address ?? "—"}
+                  <strong>Kitchen Address:</strong> {selected.kitchen?.address ?? "—"}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Kitchen Phone:</strong> {selected.kitchen?.phone_number ?? "—"}
+                </Typography>
+              </Stack>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <Typography variant="body2">
+                  <strong>Rider:</strong> {selected.rider?.full_name ?? "Unassigned"}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Rider Phone:</strong> {selected.rider?.phone_number ?? "—"}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Vehicle:</strong>{" "}
+                  {selected.rider ? `${selected.rider.vehicle_type} (${selected.rider.plate_number})` : "—"}
+                </Typography>
+              </Stack>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <Typography variant="body2">
+                  <strong>Pickup:</strong> {selected.pickup_location ?? "—"}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Dropoff:</strong> {selected.dropoff_location ?? selected.delivery_address ?? "—"}
                 </Typography>
               </Stack>
               <Typography variant="body2">

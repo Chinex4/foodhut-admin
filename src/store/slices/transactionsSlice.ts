@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { api } from "@/api/axios";
+import { mockTransactionsDb } from "@/data/mockDb";
 import type { Transaction } from "@/types/transaction";
 import type { RootState } from "..";
 
@@ -20,16 +20,13 @@ const initialState: TransactionsState = {
 type TransactionsResponse = { items: Transaction[]; meta?: unknown };
 
 export const fetchTransactions = createAsyncThunk<Transaction[]>("transactions/fetchAll", async () => {
-  const { data } = await api.get<TransactionsResponse>("/transactions");
-  if (Array.isArray((data as TransactionsResponse).items)) return data.items;
-  return Array.isArray(data) ? (data as unknown as Transaction[]) : [];
+  return mockTransactionsDb.fetchAll();
 });
 
 export const fetchTransactionById = createAsyncThunk<Transaction, string>(
   "transactions/fetchById",
   async (id) => {
-    const { data } = await api.get<Transaction>(`/transactions/${id}`);
-    return data;
+    return mockTransactionsDb.fetchById(id);
   },
 );
 

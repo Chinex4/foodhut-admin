@@ -7,6 +7,8 @@ import ordersReducer from "./slices/ordersSlice";
 import transactionsReducer from "./slices/transactionsSlice";
 import searchReducer from "./slices/searchSlice";
 import uiReducer from "./slices/uiSlice";
+import ridersReducer from "./slices/ridersSlice";
+import areaCitiesReducer from "./slices/areaCitiesSlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +20,8 @@ export const store = configureStore({
     transactions: transactionsReducer,
     search: searchReducer,
     ui: uiReducer,
+    riders: ridersReducer,
+    areaCities: areaCitiesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

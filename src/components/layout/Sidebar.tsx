@@ -18,16 +18,20 @@ import {
   ReceiptText,
   Wallet,
   Search,
+  Bike,
+  MapPin,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/storeHooks";
 import { toggleSidebar } from "@/store/slices/uiSlice";
 
 const navItems = [
   { label: "Dashboard", icon: <LayoutDashboard size={18} />, to: "/" },
-  { label: "Kitchens", icon: <Utensils size={18} />, to: "/kitchens" },
+  { label: "Vendors", icon: <Utensils size={18} />, to: "/vendors" },
   { label: "Meals", icon: <Sandwich size={18} />, to: "/meals" },
   { label: "Ads", icon: <Megaphone size={18} />, to: "/ads" },
   { label: "Orders", icon: <ReceiptText size={18} />, to: "/orders" },
+  { label: "Riders", icon: <Bike size={18} />, to: "/riders" },
+  { label: "Areas/Cities", icon: <MapPin size={18} />, to: "/areas-cities" },
   { label: "Transactions", icon: <Wallet size={18} />, to: "/transactions" },
   { label: "Search", icon: <Search size={18} />, to: "/search" },
 ];

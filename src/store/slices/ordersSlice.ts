@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { api } from "@/api/axios";
+import { mockOrdersDb } from "@/data/mockDb";
 import type { Order } from "@/types/order";
 import type { RootState } from "..";
 
@@ -22,11 +22,7 @@ const initialState: OrdersState = {
 type OrdersResponse = { items: Order[]; meta?: { page: number; per_page: number; total: number } };
 
 export const fetchOrders = createAsyncThunk<OrdersResponse, number | undefined>("orders/fetchAll", async (page = 1) => {
-  const currentPage = page ?? 1;
-  const { data } = await api.get<OrdersResponse>("/orders", { params: { page: currentPage, per_page: 20 } });
-  if (Array.isArray((data as OrdersResponse).items)) return { items: data.items, meta: data.meta ?? { page: currentPage, per_page: 20, total: data.items.length } };
-  const fallback = Array.isArray(data) ? (data as unknown as Order[]) : [];
-  return { items: fallback, meta: { page: currentPage, per_page: 20, total: fallback.length } };
+  return mockOrdersDb.fetchAll(page ?? 1);
 });
 
 const ordersSlice = createSlice({

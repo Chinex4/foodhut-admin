@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { api } from "@/api/axios";
+import { mockSearchDb } from "@/data/mockDb";
 import type { SearchResults } from "@/types/search";
 import type { RootState } from "..";
 
@@ -18,12 +18,7 @@ const initialState: SearchState = {
 export const searchAll = createAsyncThunk<SearchResults, { term: string; page?: number }>(
   "search/query",
   async ({ term, page = 1 }) => {
-    const { data } = await api.get<SearchResults>("/search", { params: { search: term, page } });
-    if (Array.isArray((data as SearchResults).items)) {
-      return data;
-    }
-    const items = Array.isArray(data?.items) ? data.items : [];
-    return { items, meals: data?.meals, kitchens: data?.kitchens, meta: data?.meta };
+    return mockSearchDb.search(term, page);
   },
 );
 

@@ -1,17 +1,15 @@
-import { api } from "./axios";
+import { mockKitchensDb } from "@/data/mockDb";
 import type { Kitchen, KitchenUpdatePayload } from "@/types/kitchen";
 
 export const getKitchens = async (): Promise<Kitchen[]> => {
-  const { data } = await api.get<Kitchen[]>("/kitchens");
-  return data;
+  const data = await mockKitchensDb.fetchAll(1);
+  return data.items;
 };
 
 export const getKitchen = async (id: string): Promise<Kitchen> => {
-  const { data } = await api.get<Kitchen>(`/kitchens/${id}`);
-  return data;
+  return mockKitchensDb.fetchById(id);
 };
 
 export const patchKitchen = async (id: string, payload: KitchenUpdatePayload): Promise<Kitchen> => {
-  const { data } = await api.put<Kitchen>(`/kitchens/${id}`, payload);
-  return data;
+  return mockKitchensDb.updateById(id, payload);
 };

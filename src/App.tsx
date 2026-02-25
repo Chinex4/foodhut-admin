@@ -8,6 +8,8 @@ import OrdersPage from "./pages/Orders";
 import TransactionsPage from "./pages/Transactions";
 import SearchPage from "./pages/Search";
 import AuthPage from "./pages/Auth";
+import RidersPage from "./pages/Riders";
+import AreasCitiesPage from "./pages/AreasCities";
 import { useAppSelector } from "./hooks/storeHooks";
 
 const RequireAuth = ({ children }: { children: JSX.Element }) => {
@@ -46,10 +48,13 @@ const App = () => {
           }
         >
           <Route path="/" element={<DashboardPage />} />
-          <Route path="/kitchens" element={<KitchensPage />} />
+          <Route path="/vendors" element={<KitchensPage />} />
+          <Route path="/kitchens" element={<Navigate to="/vendors" replace />} />
           <Route path="/meals" element={<MealsPage />} />
           <Route path="/ads" element={<AdsPage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/riders" element={<RidersPage />} />
+          <Route path="/areas-cities" element={<AreasCitiesPage />} />
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/search" element={<SearchPage />} />
         </Route>

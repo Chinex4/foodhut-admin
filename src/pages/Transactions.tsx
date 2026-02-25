@@ -1,16 +1,16 @@
 import { Card, CardContent, Table, TableBody, TableCell, TableHead, TableRow, Typography, Chip } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useAppDispatch } from "@/hooks/storeHooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/storeHooks";
 import { fetchTransactions } from "@/store/slices/transactionsSlice";
 import dayjs from "dayjs";
 
 const TransactionsPage = () => {
   const dispatch = useAppDispatch();
-  const { data } = useQuery({
+  const transactions = useAppSelector((state) => state.transactions.items);
+  useQuery({
     queryKey: ["transactions"],
     queryFn: () => dispatch(fetchTransactions()).unwrap(),
   });
-  const transactions = Array.isArray(data) ? data : [];
 
   return (
     <div>

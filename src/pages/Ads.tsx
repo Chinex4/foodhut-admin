@@ -2,6 +2,7 @@ import {
   Button,
   Card,
   CardContent,
+  Box,
   Stack,
   Table,
   TableBody,
@@ -14,22 +15,48 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useAppDispatch } from "@/hooks/storeHooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/storeHooks";
 import { createAd, deleteAd, fetchAds, updateAd } from "@/store/slices/adsSlice";
 
 const AdsPage = () => {
   const dispatch = useAppDispatch();
-  const [payload, setPayload] = useState({ title: "", link: "", image_url: "" });
+  const ads = useAppSelector((state) => state.ads.items);
+  const [payload, setPayload] = useState({ title: "", link: "" });
+  const [file, setFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
 
-  const { data } = useQuery({
+  useQuery({
     queryKey: ["ads"],
     queryFn: () => dispatch(fetchAds()).unwrap(),
   });
-  const ads = Array.isArray(data) ? data : [];
 
-  const handleCreate = () => {
-    if (!payload.title) return;
-    dispatch(createAd({ ...payload, is_active: true })).then(() => setPayload({ title: "", link: "", image_url: "" }));
+  const handleFileChange = (selectedFile: File | null) => {
+    setFile(selectedFile);
+    if (!selectedFile) {
+      setImagePreview("");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      setImagePreview(result);
+    };
+    reader.readAsDataURL(selectedFile);
+  };
+
+  const handleCreate = async () => {
+    if (!payload.title || !imagePreview) return;
+    await dispatch(
+      createAd({
+        title: payload.title,
+        link: payload.link,
+        image_url: imagePreview,
+        is_active: true,
+      }),
+    );
+    setPayload({ title: "", link: "" });
+    setFile(null);
+    setImagePreview("");
   };
 
   return (
@@ -42,15 +69,34 @@ const AdsPage = () => {
           <Stack direction={{ xs: "column", md: "row" }} spacing={2} mb={2}>
             <TextField label="Title" value={payload.title} onChange={(e) => setPayload((p) => ({ ...p, title: e.target.value }))} />
             <TextField label="Link" value={payload.link} onChange={(e) => setPayload((p) => ({ ...p, link: e.target.value }))} />
-            <TextField label="Image URL" value={payload.image_url} onChange={(e) => setPayload((p) => ({ ...p, image_url: e.target.value }))} />
+            <Button variant="outlined" component="label">
+              {file ? file.name : "Upload ad image"}
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+              />
+            </Button>
             <Button variant="contained" onClick={handleCreate}>
               Create
             </Button>
           </Stack>
+          {imagePreview && (
+            <Box mb={2}>
+              <img
+                src={imagePreview}
+                alt="Ad preview"
+                style={{ width: 180, height: 96, objectFit: "cover", borderRadius: 8 }}
+              />
+            </Box>
+          )}
           <Table size="small">
             <TableHead>
               <TableRow>
+                <TableCell>Image</TableCell>
                 <TableCell>Title</TableCell>
+                <TableCell>Link</TableCell>
                 <TableCell>Active</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
@@ -58,7 +104,19 @@ const AdsPage = () => {
             <TableBody>
               {ads.map((ad) => (
                 <TableRow key={ad.id} hover>
+                  <TableCell>
+                    {ad.image_url ? (
+                      <img
+                        src={ad.image_url}
+                        alt={ad.title}
+                        style={{ width: 96, height: 56, objectFit: "cover", borderRadius: 8 }}
+                      />
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell>{ad.title}</TableCell>
+                  <TableCell>{ad.link || "—"}</TableCell>
                   <TableCell>
                     <Switch
                       checked={Boolean(ad.is_active)}
