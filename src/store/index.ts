@@ -9,6 +9,7 @@ import searchReducer from "./slices/searchSlice";
 import uiReducer from "./slices/uiSlice";
 import ridersReducer from "./slices/ridersSlice";
 import areaCitiesReducer from "./slices/areaCitiesSlice";
+import logisticsReducer from "./slices/logisticsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     ui: uiReducer,
     riders: ridersReducer,
     areaCities: areaCitiesReducer,
+    logistics: logisticsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

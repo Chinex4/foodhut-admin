@@ -1,18 +1,20 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { mockAuth } from "@/data/mockDb";
 import { tokenStorage } from "@/lib/tokenStorage";
-import type { AuthTokens, OtpPayload, UserProfile } from "@/types/auth";
+import type { AuthTokens, OtpPayload, PortalType, UserProfile } from "@/types/auth";
 import type { RootState } from "..";
 
 type AuthState = {
   tokens: AuthTokens | null;
   profile: UserProfile | null;
+  portal: PortalType | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 };
 
 const initialState: AuthState = {
   tokens: tokenStorage.get(),
+  portal: tokenStorage.getPortal(),
   profile: null,
   status: "idle",
   error: null,
@@ -60,8 +62,17 @@ const authSlice = createSlice({
         tokenStorage.clear();
       }
     },
+    setPortal(state, action: PayloadAction<PortalType | null>) {
+      state.portal = action.payload;
+      if (action.payload) {
+        tokenStorage.setPortal(action.payload);
+      } else {
+        tokenStorage.clearPortal();
+      }
+    },
     logout(state) {
       state.tokens = null;
+      state.portal = null;
       state.profile = null;
       state.status = "idle";
       tokenStorage.clear();
@@ -109,5 +120,5 @@ const authSlice = createSlice({
 });
 
 export const selectAuth = (state: RootState) => state.auth;
-export const { logout, setTokens } = authSlice.actions;
+export const { logout, setTokens, setPortal } = authSlice.actions;
 export default authSlice.reducer;

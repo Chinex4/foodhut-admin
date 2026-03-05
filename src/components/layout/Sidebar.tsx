@@ -20,11 +20,14 @@ import {
   Search,
   Bike,
   MapPin,
+  Truck,
+  ShieldCheck,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/storeHooks";
 import { toggleSidebar } from "@/store/slices/uiSlice";
+import type { PortalType } from "@/types/auth";
 
-const navItems = [
+const adminNavItems = [
   { label: "Dashboard", icon: <LayoutDashboard size={18} />, to: "/" },
   { label: "Vendors", icon: <Utensils size={18} />, to: "/vendors" },
   { label: "Meals", icon: <Sandwich size={18} />, to: "/meals" },
@@ -36,20 +39,30 @@ const navItems = [
   { label: "Search", icon: <Search size={18} />, to: "/search" },
 ];
 
+const logisticsNavItems = [
+  { label: "Compliance KYC", icon: <ShieldCheck size={18} />, to: "/logistics/compliance" },
+  { label: "Bike Accounts", icon: <Bike size={18} />, to: "/logistics/bikes" },
+  { label: "Active Orders", icon: <Truck size={18} />, to: "/logistics/orders" },
+  { label: "General Wallet", icon: <Wallet size={18} />, to: "/logistics/wallet" },
+];
+
 type SidebarProps = {
   width?: number;
+  mode?: PortalType;
 };
 
-const Sidebar: FC<SidebarProps> = ({ width = 260 }) => {
+const Sidebar: FC<SidebarProps> = ({ width = 260, mode = "admin" }) => {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { sidebarOpen } = useAppSelector((s) => s.ui);
+  const navItems = mode === "logistics" ? logisticsNavItems : adminNavItems;
+  const title = mode === "logistics" ? "Foodhut Logistics" : "Foodhut Console";
 
   const drawer = (
     <div>
       <Toolbar>
         <Typography variant="h6" color="primary">
-          Foodhut Admin
+          {title}
         </Typography>
       </Toolbar>
       <List>

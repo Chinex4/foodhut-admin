@@ -6,7 +6,11 @@ import { useAppDispatch } from "@/hooks/storeHooks";
 import { toggleSidebar } from "@/store/slices/uiSlice";
 import { logout } from "@/store/slices/authSlice";
 
-const Topbar = () => {
+type TopbarProps = {
+  title?: string;
+};
+
+const Topbar = ({ title = "Foodhut Console" }: TopbarProps) => {
   const dispatch = useAppDispatch();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -44,7 +48,7 @@ const Topbar = () => {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Foodhut Admin
+          {title}
         </Typography>
         <Box>
           <Tooltip title="Account">

@@ -3,6 +3,8 @@ export type AuthTokens = {
   refresh_token: string;
 };
 
+export type PortalType = "admin" | "logistics";
+
 export type UserProfile = {
   id: string;
   email: string;

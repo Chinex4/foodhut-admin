@@ -1,24 +1,15 @@
 import { useState } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Stack,
-  TextField,
-  Typography,
-  Alert,
-} from "@mui/material";
+import { Alert, Box, Button, Card, CardContent, Stack, TextField, Typography } from "@mui/material";
 import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/storeHooks";
 import { fetchProfile, resendOtp, sendOtp, setPortal, verifyOtp } from "@/store/slices/authSlice";
-import { Link, useNavigate } from "react-router-dom";
 
-const AuthPage = () => {
+const LogisticsAuthPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const auth = useAppSelector((s) => s.auth);
-  const [phone, setPhone] = useState("+2348123456789");
+  const auth = useAppSelector((state) => state.auth);
+  const [phone, setPhone] = useState("+2348090000000");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
 
@@ -34,9 +25,9 @@ const AuthPage = () => {
   const handleVerify = async () => {
     try {
       await dispatch(verifyOtp({ phone_number: phone, otp })).unwrap();
-      dispatch(setPortal("admin"));
+      dispatch(setPortal("logistics"));
       await dispatch(fetchProfile()).unwrap();
-      navigate("/");
+      navigate("/logistics/compliance");
     } catch {
       // errors are handled via auth.error from slice
     }
@@ -44,15 +35,12 @@ const AuthPage = () => {
 
   return (
     <Box
-      className="min-h-screen"
       sx={{
+        minHeight: "100vh",
         display: "grid",
         placeItems: "center",
-        background: `
-          linear-gradient(135deg, rgba(15,23,42,0.95), rgba(11,17,31,0.98)),
-          radial-gradient(circle at 20% 20%, rgba(255,168,0,0.14), transparent 30%),
-          radial-gradient(circle at 80% 10%, rgba(255,225,167,0.12), transparent 32%)
-        `,
+        background:
+          "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(11,17,31,0.98)), radial-gradient(circle at 18% 20%, rgba(255,168,0,0.16), transparent 32%), radial-gradient(circle at 78% 12%, rgba(255,225,167,0.12), transparent 34%)",
         p: 2,
       }}
     >
@@ -70,17 +58,12 @@ const AuthPage = () => {
           <CardContent>
             <Stack spacing={2}>
               <Typography variant="h5" textAlign="center" fontWeight={700}>
-                Foodhut Admin Login
+                Logistics Login
               </Typography>
               {auth.error && <Alert severity="error">{auth.error}</Alert>}
               {step === "phone" && (
                 <Stack spacing={2}>
-                  <TextField
-                    label="Phone number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    fullWidth
-                  />
+                  <TextField label="Phone number" value={phone} onChange={(event) => setPhone(event.target.value)} fullWidth />
                   <Button variant="contained" onClick={handleSendOtp} disabled={auth.status === "loading"}>
                     Send OTP
                   </Button>
@@ -88,7 +71,7 @@ const AuthPage = () => {
               )}
               {step === "otp" && (
                 <Stack spacing={2}>
-                  <TextField label="OTP" value={otp} onChange={(e) => setOtp(e.target.value)} fullWidth />
+                  <TextField label="OTP" value={otp} onChange={(event) => setOtp(event.target.value)} fullWidth />
                   <Stack direction="row" spacing={1}>
                     <Button variant="outlined" onClick={() => dispatch(resendOtp(phone))} fullWidth>
                       Resend OTP
@@ -100,10 +83,10 @@ const AuthPage = () => {
                 </Stack>
               )}
               <Button component={Link} to="/logistics/signup" variant="outlined">
-                Logistics Company Signup
+                New company? Create account
               </Button>
-              <Button component={Link} to="/logistics/auth" variant="text">
-                Logistics Login
+              <Button component={Link} to="/auth" variant="text">
+                Back to Admin Login
               </Button>
             </Stack>
           </CardContent>
@@ -113,4 +96,4 @@ const AuthPage = () => {
   );
 };
 
-export default AuthPage;
+export default LogisticsAuthPage;
