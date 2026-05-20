@@ -1,14 +1,20 @@
+import { useEffect } from "react";
 import dayjs from "dayjs";
-import { Box, Card, CardContent, Chip, Grid, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
-import { useAppSelector } from "@/hooks/storeHooks";
-import { selectLogistics } from "@/store/slices/logisticsSlice";
+import { Box, Button, Card, CardContent, Chip, Grid, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "@/hooks/storeHooks";
+import { fetchDeliveries, selectLogistics, updateDeliveryStatus } from "@/store/slices/logisticsSlice";
 import { naira, orderColor, statusLabel } from "./helpers";
 
 const ActiveOrdersPage = () => {
-  const { orders, riders } = useAppSelector(selectLogistics);
-  const activeOrders = orders.filter((order) => order.amount > 0 && order.status !== "delivered");
+  const dispatch = useAppDispatch();
+  const { orders, riders, status } = useAppSelector(selectLogistics);
+  const activeOrders = orders.filter((order) => order.status !== "delivered" && order.status !== "DELIVERED");
   const activeRiders = riders.filter((rider) => rider.status === "active").length;
   const pausedRiders = riders.filter((rider) => rider.status === "paused").length;
+
+  useEffect(() => {
+    dispatch(fetchDeliveries(1));
+  }, [dispatch]);
 
   return (
     <Stack spacing={2.5}>
@@ -67,6 +73,7 @@ const ActiveOrdersPage = () => {
                   <TableCell>Dropoff</TableCell>
                   <TableCell>Amount</TableCell>
                   <TableCell>Status</TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -89,11 +96,45 @@ const ActiveOrdersPage = () => {
                     <TableCell>
                       <Chip size="small" color={orderColor(order.status)} label={statusLabel(order.status)} />
                     </TableCell>
+                    <TableCell align="right">
+                      {order.deliveryId && (
+                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                          <Button
+                            size="small"
+                            onClick={() =>
+                              dispatch(updateDeliveryStatus({ delivery_id: order.deliveryId!, delivery_status: "PICKED_UP" }))
+                            }
+                            disabled={status === "loading"}
+                          >
+                            Picked up
+                          </Button>
+                          <Button
+                            size="small"
+                            onClick={() =>
+                              dispatch(updateDeliveryStatus({ delivery_id: order.deliveryId!, delivery_status: "IN_TRANSIT" }))
+                            }
+                            disabled={status === "loading"}
+                          >
+                            In transit
+                          </Button>
+                          <Button
+                            size="small"
+                            color="success"
+                            onClick={() =>
+                              dispatch(updateDeliveryStatus({ delivery_id: order.deliveryId!, delivery_status: "DELIVERED" }))
+                            }
+                            disabled={status === "loading"}
+                          >
+                            Delivered
+                          </Button>
+                        </Stack>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
                 {!activeOrders.length && (
                   <TableRow>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={7}>
                       <Typography variant="body2" color="text.secondary">
                         No active orders available.
                       </Typography>

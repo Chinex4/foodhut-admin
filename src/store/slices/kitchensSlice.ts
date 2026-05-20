@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { mockKitchensDb } from "@/data/mockDb";
+import { api } from "@/api/axios";
 import type { Kitchen, KitchenUpdatePayload } from "@/types/kitchen";
 import type { RootState } from "..";
 
@@ -26,46 +26,59 @@ const initialState: KitchensState = {
 type KitchensResponse = { items: Kitchen[]; meta?: { page: number; per_page: number; total: number } };
 
 export const fetchKitchens = createAsyncThunk<KitchensResponse, number | undefined>("kitchens/fetchAll", async (page = 1) => {
-  return mockKitchensDb.fetchAll(page ?? 1);
+  const { data } = await api.get<KitchensResponse>("/kitchens", { params: { page, per_page: 20 } });
+  return data;
 });
 
 export const fetchKitchenTypes = createAsyncThunk<string[]>("kitchens/fetchTypes", async () => {
-  return mockKitchensDb.fetchTypes();
+  const { data } = await api.get<{ items?: string[]; data?: string[] } | string[]>("/kitchens/types");
+  return Array.isArray(data) ? data : data.items ?? data.data ?? [];
 });
 
 export const fetchKitchenCities = createAsyncThunk<string[]>("kitchens/fetchCities", async () => {
-  return mockKitchensDb.fetchCities();
+  const { data } = await api.get<{ items?: Array<{ name?: string }>; data?: Array<{ name?: string }> } | Array<{ name?: string }>>(
+    "/kitchens/cities",
+  );
+  const items = Array.isArray(data) ? data : data.items ?? data.data ?? [];
+  return items.map((city) => city.name ?? String(city)).filter(Boolean);
 });
 
 export const fetchKitchenById = createAsyncThunk<Kitchen, string>("kitchens/fetchById", async (id) => {
-  return mockKitchensDb.fetchById(id);
+  const { data } = await api.get<Kitchen>(`/kitchens/${id}`);
+  return data;
 });
 
 export const updateKitchenById = createAsyncThunk<Kitchen, { id: string; payload: KitchenUpdatePayload }>(
   "kitchens/updateById",
   async ({ id, payload }) => {
-    return mockKitchensDb.updateById(id, payload);
+    const { data } = await api.patch<Kitchen>(`/kitchens/${id}`, payload);
+    return data;
   },
 );
 
 export const updateKitchenCover = createAsyncThunk<Kitchen, { id: string; cover_image_url: string }>(
   "kitchens/updateCover",
   async ({ id, cover_image_url }) => {
-    return mockKitchensDb.updateCover(id, cover_image_url);
+    const { data } = await api.patch<Kitchen>(`/kitchens/${id}`, { cover_image_url });
+    return data;
   },
 );
 
 export const blockKitchen = createAsyncThunk<Kitchen, { id: string; blocked: boolean }>(
   "kitchens/block",
   async ({ id, blocked }) => {
-    return mockKitchensDb.setBlocked(id, blocked);
+    const { data } = await api.put<Kitchen>(`/kitchens/${id}/${blocked ? "block" : "unblock"}`);
+    return data;
   },
 );
 
 export const verifyKitchen = createAsyncThunk<Kitchen, { id: string; verified: boolean }>(
   "kitchens/verify",
   async ({ id, verified }) => {
-    return mockKitchensDb.setVerified(id, verified);
+    const { data } = verified
+      ? await api.patch<Kitchen>(`/kitchens/${id}/verify`)
+      : await api.put<Kitchen>(`/kitchens/${id}/unverify`);
+    return data;
   },
 );
 

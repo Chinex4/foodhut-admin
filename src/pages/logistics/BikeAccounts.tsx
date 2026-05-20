@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import {
   Box,
@@ -21,29 +21,45 @@ import {
   TextField,
   Tooltip,
   Typography,
+  Chip,
 } from "@mui/material";
 import { Bike, KeyRound, Plus, Power } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/storeHooks";
-import { registerRiderBikeAccount, resetRiderPasscode, selectLogistics, toggleRiderStatus } from "@/store/slices/logisticsSlice";
+import {
+  fetchLogisticsCompanies,
+  fetchLogisticsRiders,
+  registerRiderBikeAccount,
+  resetRiderPasscode,
+  selectLogistics,
+  toggleRiderStatus,
+  verifyRiderKyc,
+} from "@/store/slices/logisticsSlice";
 import { naira, riderColor } from "./helpers";
 
 const BikeAccountsPage = () => {
   const dispatch = useAppDispatch();
-  const { riders, businessAccount } = useAppSelector(selectLogistics);
+  const { riders, businessAccount, status, error } = useAppSelector(selectLogistics);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
+    email: "",
     phoneNumber: "",
     bikeType: "Bike",
     plateNumber: "",
     passcode: "",
   });
 
+  useEffect(() => {
+    dispatch(fetchLogisticsCompanies(1));
+    dispatch(fetchLogisticsRiders(1));
+  }, [dispatch]);
+
   const handleCreateRider = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     dispatch(
       registerRiderBikeAccount({
         fullName: form.fullName,
+        email: form.email,
         phoneNumber: form.phoneNumber,
         bikeType: form.bikeType,
         plateNumber: form.plateNumber,
@@ -52,6 +68,7 @@ const BikeAccountsPage = () => {
     );
     setForm({
       fullName: "",
+      email: "",
       phoneNumber: "",
       bikeType: "Bike",
       plateNumber: "",
@@ -70,6 +87,7 @@ const BikeAccountsPage = () => {
           Register Bike Account
         </Button>
       </Stack>
+      {error && <Typography color="error">{error}</Typography>}
 
       <Card elevation={0}>
         <CardContent>
@@ -114,9 +132,19 @@ const BikeAccountsPage = () => {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" color={riderColor(rider.status) === "success" ? "success.main" : "warning.main"}>
+                      <Typography
+                        variant="body2"
+                        color={
+                          riderColor(rider.status) === "success"
+                            ? "success.main"
+                            : riderColor(rider.status) === "error"
+                              ? "error.main"
+                              : "warning.main"
+                        }
+                      >
                         {rider.status}
                       </Typography>
+                      {rider.kycStatus && <Chip size="small" label={`KYC ${rider.kycStatus}`} sx={{ mt: 0.5 }} />}
                     </TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={0.5} justifyContent="flex-end">
@@ -134,9 +162,31 @@ const BikeAccountsPage = () => {
                             <Power size={16} />
                           </IconButton>
                         </Tooltip>
+                        {rider.kycId && rider.kycStatus === "pending" && (
+                          <>
+                            <Button
+                              size="small"
+                              onClick={() =>
+                                dispatch(verifyRiderKyc({ riderId: rider.id, kyc_id: rider.kycId!, verification_status: "VERIFIED" }))
+                              }
+                            >
+                              Verify
+                            </Button>
+                            <Button
+                              size="small"
+                              color="error"
+                              onClick={() =>
+                                dispatch(verifyRiderKyc({ riderId: rider.id, kyc_id: rider.kycId!, verification_status: "REJECTED" }))
+                              }
+                            >
+                              Reject
+                            </Button>
+                          </>
+                        )}
                         <Switch
                           checked={rider.status === "active"}
                           onChange={(_, checked) => dispatch(toggleRiderStatus({ riderId: rider.id, active: checked }))}
+                          disabled={status === "loading"}
                         />
                       </Stack>
                     </TableCell>
@@ -157,6 +207,13 @@ const BikeAccountsPage = () => {
                 label="Rider Full Name"
                 value={form.fullName}
                 onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))}
+                required
+              />
+              <TextField
+                label="Email"
+                type="email"
+                value={form.email}
+                onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
                 required
               />
               <TextField

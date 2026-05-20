@@ -1,7 +1,58 @@
 export type LogisticsAccountStatus = "draft" | "pending" | "approved";
 export type ComplianceStatus = "missing" | "pending" | "approved";
-export type RiderStatus = "active" | "paused";
-export type LogisticsOrderStatus = "assigned" | "picked_up" | "delivering" | "paused" | "delivered";
+export type RiderStatus = "active" | "paused" | "blocked";
+export type LogisticsOrderStatus =
+  | "PENDING"
+  | "ASSIGNED"
+  | "AWAITING_PICKUP"
+  | "PICKED_UP"
+  | "IN_TRANSIT"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "FAILED"
+  | "assigned"
+  | "picked_up"
+  | "delivering"
+  | "paused"
+  | "delivered";
+
+export type LogisticsCompany = {
+  id: string;
+  name: string;
+  registration_number: string;
+  email: string;
+  phone_number: string;
+  address: any;
+  verification_status: "PENDING" | "VERIFIED" | "REJECTED";
+  operations_manager_id?: string;
+  created_at?: number | string;
+  updated_at?: number | string | null;
+  kyc?: any;
+};
+
+export type LogisticsDelivery = {
+  id: string;
+  order_id?: string;
+  rider_id?: string | null;
+  delivery_status: LogisticsOrderStatus;
+  pickup_address?: string;
+  dropoff_address?: string;
+  delivery_fee?: number | string;
+  created_at?: number | string;
+  updated_at?: number | string | null;
+  rider?: any;
+  order?: any;
+};
+
+export type LogisticsOffer = {
+  id: string;
+  order_id: string;
+  rider_id: string;
+  amount: number;
+  status: "PENDING" | "COUNTERED" | "ACCEPTED" | "REJECTED" | "EXPIRED";
+  created_at?: number | string;
+  updated_at?: number | string | null;
+};
 
 export type LogisticsBusinessAccount = {
   id: string;
@@ -13,6 +64,7 @@ export type LogisticsBusinessAccount = {
   fleetSize: number;
   status: LogisticsAccountStatus;
   createdAt: string;
+  raw?: LogisticsCompany;
 };
 
 export type ComplianceItem = {
@@ -26,6 +78,7 @@ export type RiderAccount = {
   id: string;
   fullName: string;
   phoneNumber: string;
+  email?: string;
   bikeType: string;
   plateNumber: string;
   bikeAccountId: string;
@@ -33,10 +86,14 @@ export type RiderAccount = {
   activeOrders: number;
   earningsToday: number;
   status: RiderStatus;
+  kycId?: string;
+  kycStatus?: "pending" | "approved" | "rejected";
+  raw?: any;
 };
 
 export type LogisticsOrder = {
   id: string;
+  deliveryId?: string;
   riderId: string;
   riderName: string;
   pickup: string;
@@ -65,6 +122,7 @@ export type LogisticsSignupPayload = {
 
 export type RegisterRiderPayload = {
   fullName: string;
+  email: string;
   phoneNumber: string;
   bikeType: string;
   plateNumber: string;

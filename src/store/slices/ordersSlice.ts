@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { mockOrdersDb } from "@/data/mockDb";
+import { api } from "@/api/axios";
 import type { Order } from "@/types/order";
 import type { RootState } from "..";
 
@@ -22,8 +22,17 @@ const initialState: OrdersState = {
 type OrdersResponse = { items: Order[]; meta?: { page: number; per_page: number; total: number } };
 
 export const fetchOrders = createAsyncThunk<OrdersResponse, number | undefined>("orders/fetchAll", async (page = 1) => {
-  return mockOrdersDb.fetchAll(page ?? 1);
+  const { data } = await api.get<OrdersResponse>("/orders", { params: { page, per_page: 20 } });
+  return data;
 });
+
+export const updateOrderStatus = createAsyncThunk<Order, { id: string; status: string }>(
+  "orders/updateStatus",
+  async ({ id, status }) => {
+    const { data } = await api.put<Order>(`/orders/${id}/status`, { status });
+    return data;
+  },
+);
 
 const ordersSlice = createSlice({
   name: "orders",
@@ -47,6 +56,10 @@ const ordersSlice = createSlice({
       .addCase(fetchOrders.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message ?? "Failed to fetch orders";
+      })
+      .addCase(updateOrderStatus.fulfilled, (state, action) => {
+        state.items = state.items.map((order) => (order.id === action.payload.id ? action.payload : order));
+        state.selected = action.payload;
       });
   },
 });

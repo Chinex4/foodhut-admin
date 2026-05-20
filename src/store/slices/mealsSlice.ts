@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { mockMealsDb } from "@/data/mockDb";
+import { api } from "@/api/axios";
 import type { Meal, MealPayload } from "@/types/meal";
 import type { RootState } from "..";
 
@@ -22,26 +22,33 @@ const initialState: MealsState = {
 type MealsResponse = { items: Meal[]; meta?: { page: number; per_page: number; total: number } };
 
 export const fetchMeals = createAsyncThunk<MealsResponse, number | undefined>("meals/fetchAll", async (page = 1) => {
-  return mockMealsDb.fetchAll(page ?? 1);
+  const { data } = await api.get<MealsResponse>("/meals", { params: { page, per_page: 20 } });
+  return data;
 });
 
 export const fetchMealById = createAsyncThunk<Meal, string>("meals/fetchById", async (id) => {
-  return mockMealsDb.fetchById(id);
+  const { data } = await api.get<Meal>(`/meals/${id}`);
+  return data;
 });
 
 export const createMeal = createAsyncThunk<Meal, FormData>("meals/create", async (payload) => {
-  return mockMealsDb.createFromFormData(payload);
+  const { data } = await api.post<Meal>("/meals", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
 });
 
 export const updateMeal = createAsyncThunk<Meal, { id: string; payload: Partial<MealPayload> }>(
   "meals/update",
   async ({ id, payload }) => {
-    return mockMealsDb.updateById(id, payload);
+    const { data } = await api.patch<Meal>(`/meals/${id}`, payload);
+    return data;
   },
 );
 
 export const deleteMeal = createAsyncThunk<string, string>("meals/delete", async (id) => {
-  return mockMealsDb.deleteById(id);
+  await api.delete(`/meals/${id}`);
+  return id;
 });
 
 const mealsSlice = createSlice({

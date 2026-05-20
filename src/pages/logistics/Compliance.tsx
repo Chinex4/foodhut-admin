@@ -1,14 +1,14 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { Alert, Box, Button, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from "@mui/material";
 import { ShieldCheck } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/storeHooks";
-import { selectLogistics, submitComplianceKyc } from "@/store/slices/logisticsSlice";
+import { fetchLogisticsCompanies, selectLogistics, submitComplianceKyc } from "@/store/slices/logisticsSlice";
 import { accountStatusColor, complianceColor } from "./helpers";
 
 const CompliancePage = () => {
   const dispatch = useAppDispatch();
-  const { businessAccount, complianceChecklist } = useAppSelector(selectLogistics);
+  const { businessAccount, complianceChecklist, error, mutationStatus } = useAppSelector(selectLogistics);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({
     cacCertificateNumber: "",
@@ -22,9 +22,21 @@ const CompliancePage = () => {
     return `${approved}/${complianceChecklist.length} complete`;
   }, [complianceChecklist]);
 
-  const handleSubmitKyc = (event: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    dispatch(fetchLogisticsCompanies(1));
+  }, [dispatch]);
+
+  const handleSubmitKyc = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    dispatch(submitComplianceKyc());
+    if (!businessAccount) return;
+    await dispatch(
+      submitComplianceKyc({
+        company_id: businessAccount.id,
+        cac_certificate_id: form.cacCertificateNumber.trim(),
+        tin_tax_record_id: form.tinNumber.trim(),
+        insurance_cover_id: form.insuranceProvider.trim(),
+      }),
+    );
     setForm({
       cacCertificateNumber: "",
       tinNumber: "",
@@ -39,6 +51,7 @@ const CompliancePage = () => {
       <Typography variant="h5" fontWeight={700}>
         Compliance (Logistics KYC)
       </Typography>
+      {error && <Alert severity="error">{error}</Alert>}
       <Card elevation={0}>
         <CardContent>
           <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems={{ md: "center" }}>
@@ -50,7 +63,7 @@ const CompliancePage = () => {
                 {progress}
               </Typography>
             </Stack>
-            <Button variant="contained" startIcon={<ShieldCheck size={16} />} onClick={() => setDialogOpen(true)}>
+            <Button variant="contained" startIcon={<ShieldCheck size={16} />} onClick={() => setDialogOpen(true)} disabled={mutationStatus === "loading"}>
               Submit KYC
             </Button>
           </Stack>
